@@ -1,42 +1,41 @@
-#ifndef UDP_SERVER_H
-#define UDP_SERVER_H
+#ifndef HTTP_SERVER_H
+#define HTTP_SERVER_H
 
 #include "ISessionManager.h"
 #include "ICdrWriter.h"
-#include "ISocket.h"
+
+#include <httplib.h>
 
 #include <memory> // unique_ptr
 
-class UdpServer{
+class HttpServer{
 private:
-    static constexpr uint32_t MAX_DATAGRAM_SIZE {1500};
+    static inline const std::string HOST {"0.0.0.0"};
     // Ассоциация
     ISessionManager& m_sessionManager;
-    ICdrWriter& m_cdrWriter;
     // Композиция
-    std::unique_ptr<ISocket> m_socket;
-    pgw::types::Ip m_ip;
+    std::unique_ptr<httplib::Server> m_server;
     pgw::types::Port m_port;
     bool m_running;
 
 public:
     // Передаем соккет в конструктор, чтобы тестировать и много не думать
-    explicit UdpServer(
+    explicit HttpServer(
         ISessionManager& sessionManager,
         ICdrWriter& m_cdrWriter,
-        std::unique_ptr<ISocket> socket,
-        pgw::types::ConstIp ip,
         pgw::types::Port port
     );
-    ~UdpServer();
+    ~HttpServer();
 
     void start();
     void stop();
     void run();
 
     bool isRunning() const {return m_running;}
-    int getFd() const {return m_socket->getFd();}; // Файловый дискриптор для poll
-    bool validateImsi(const std::string& imsi);
+
+    void setRoutes(); // Сопоставитель запросов к серверу с обработчиками
+    void handleCheckSubscriber(const httplib::Request& req, httplib::Response& res);
+    void handleStop(const httplib::Request& req, httplib::Response& res);
 };
 
 
