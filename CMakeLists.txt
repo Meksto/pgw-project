@@ -4,6 +4,8 @@ project(PGW_Project LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(BUILD_CLIENT "Build client" ON)
+option(BUILD_SERVER "Build server" ON)
 option(BUILD_TESTS "Build tests" ON)
 
 include(FetchContent)
@@ -29,6 +31,28 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(httplib)
 
+# Общие исходники (статическая библиотека)
+add_library(pgw_common STATIC
+    src/logger.cpp
+    src/Socket.cpp
+)
+target_include_directories(pgw_common PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/interfaces
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_link_libraries(
+    pgw_common PRIVATE
+    spdlog::spdlog
+)
+
+if(BUILD_CLIENT)
+    add_subdirectory(pgw_client)
+endif()
+
+if(BUILD_SERVER)
+    add_subdirectory(pgw_server)
+endif()
+
 if(BUILD_TESTS)
     FetchContent_Declare(
         googletest
@@ -37,8 +61,13 @@ if(BUILD_TESTS)
     )
     FetchContent_MakeAvailable(googletest)
 
-    enable_testing()
     add_subdirectory(tests)
 endif()
 
-add_subdirectory(src)
+# Сообщение о конфигурации сборки
+message(STATUS "=========================")
+message(STATUS "  Build configuration:")
+message(STATUS "  Server: ${BUILD_SERVER}")
+message(STATUS "  Client: ${BUILD_CLIENT}")
+message(STATUS "  Tests: ${BUILD_TESTS}")
+message(STATUS "=========================")
