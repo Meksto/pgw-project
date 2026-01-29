@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.15) ## очень древняя версия. на современном cmake это даже не запустится, т.к полностью вырезана поддержка <3.5
 project(PGW_Project LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17) # 2026 год на дворе, скоро с++26
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_CLIENT "Build client" ON)
